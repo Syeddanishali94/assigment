@@ -9,7 +9,7 @@ interface Post {
 }
 
 async function getPosts(): Promise<Post[]> {
-  const res = await fetch('http://localhost:3000/api/posts', { cache: 'no-store' });
+  const res = await fetch('/api/posts', { cache: 'no-store' });
 
   if (!res.ok) {
     throw new Error('Failed to fetch posts');
