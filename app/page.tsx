@@ -6,6 +6,7 @@ interface Post {
   excerpt: string;
   author: string;
   date: string;
+  img: string;
 }
 
 async function getPosts(): Promise<Post[]> {
@@ -29,7 +30,7 @@ export default async function Home() {
 
   try {
     posts = await getPosts();
-  } catch (error) {
+  } catch (error: any) {
     console.error(error.message);
   }
 
