@@ -1,7 +1,7 @@
 import PostCard from '@/components/PostCard';
 
 interface Post {
-  id: string;
+  id: any;
   title: string;
   excerpt: string;
   author: string;
@@ -9,34 +9,46 @@ interface Post {
   img: string;
 }
 
-async function getPosts(): Promise<Post[]> {
-  const res = await fetch('/api/posts', { cache: 'no-store' });
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch posts');
+const fetchPosts = async (): Promise<Post[]> => {
+  try {
+    const response = await fetch('/api/posts', { cache: 'no-store' });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch posts');
+    }
+
+    const posts = await response.json();
+
+    if (!Array.isArray(posts)) {
+      throw new Error('Unexpected response format');
+    }
+
+    return posts.map((post) => ({
+      ...post,
+      id: String(post.id), // Ensure id is a string
+    })) as Post[];
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Error fetching posts:', error.message);
+    } else {
+      console.error('Unknown error occurred:', error);
+    }
+    return [];
   }
-
-  const data = await res.json();
-
-  if (!Array.isArray(data)) {
-    throw new Error('Unexpected response format');
-  }
-
-  return data as Post[];
-}
+};
 
 export default async function Home() {
   let posts: Post[] = [];
 
   try {
-    posts = await getPosts();
-  } catch (error: any) {
-    console.error(error.message);
+    posts = await fetchPosts();
+  } catch (error) {
+    console.error('Failed to load posts:', error);
   }
 
   return (
     <div className="mt-[45px] bg-background">
-    
       {/* Main Content Section */}
       <main className="container mx-auto px-4">
         <h2 className="text-2xl font-semibold mb-6">Latest Posts</h2>
@@ -50,8 +62,6 @@ export default async function Home() {
           <p className="text-muted-foreground">No posts available at the moment.</p>
         )}
       </main>
-
-     
     </div>
   );
 }
